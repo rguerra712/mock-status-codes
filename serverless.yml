@@ -1,0 +1,20 @@
+service: mock-status-codes
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+plugins:
+  - serverless-offline
+
+functions:
+  status:
+    handler: handler.status
+    events:
+      - http:
+          path: status/{code}
+          method: get
+        request: 
+          parameters: 
+            paths: 
+              code: true
