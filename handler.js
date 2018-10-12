@@ -3,21 +3,29 @@
 const status = require('statuses');
 const {
   getValidationErrorFor
-} = require('../../lib/parameter-validator');
+} = require('./lib/parameter-validator');
 
 module.exports.status = (event, context, callback) => {
   const code = event && event.pathParameters && event.pathParameters.code;
-  const alternateCode = event && event.pathParameters && event.pathParameters.alternateCode;
-  const alternateProbability = event && event.pathParameters && event.pathParameters.alternateProbability;
-  const errorResponse = getValidationErrorFor(code);
+  const alternateCode = event && event.queryStringParameters && event.queryStringParameters.alternateCode;
+  const alternateProbability = event && event.queryStringParameters && event.queryStringParameters.alternateProbability;
+  const errorResponse = getValidationErrorFor(code, alternateCode, alternateProbability);
   if (errorResponse) {
     callback(null, errorResponse);
     return;
   }
 
-  const message = status[code];
+  let codeToUse = code;
+  if (alternateCode && alternateProbability) {
+    const random = Math.random();
+    if (random <= alternateProbability) {
+      codeToUse = alternateCode;
+    }
+  }
+
+  const message = status[codeToUse];
   const response = {
-    statusCode: code,
+    statusCode: codeToUse,
     body: message
   };
   callback(null, response);
