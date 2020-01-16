@@ -1,39 +1,31 @@
 'use strict';
 
 const status = require('statuses');
+const {
+  getValidationErrorFor
+} = require('./lib/parameter-validator');
 
 module.exports.status = (event, context, callback) => {
-  if (!event || !event.pathParameters || !event.pathParameters.code) {
-    const response = {
-      statusCode: 400,
-      body: 'Status code is required!'
-    };
-    callback(null, response);
+  const code = event && event.pathParameters && event.pathParameters.code;
+  const alternateCode = event && event.queryStringParameters && event.queryStringParameters.alternateCode;
+  const alternateProbability = event && event.queryStringParameters && event.queryStringParameters.alternateProbability;
+  const errorResponse = getValidationErrorFor(code, alternateCode, alternateProbability);
+  if (errorResponse) {
+    callback(null, errorResponse);
     return;
   }
 
-  const code = event.pathParameters.code;
-  if (isNaN(code)) {
-    const response = {
-      statusCode: 400,
-      body: 'Status code should be numeric!'
-    };
-    callback(null, response);
-    return;
+  let codeToUse = code;
+  if (alternateCode && alternateProbability) {
+    const random = Math.random();
+    if (random <= alternateProbability) {
+      codeToUse = alternateCode;
+    }
   }
 
-  if (!status[code]) {
-    const response = {
-      statusCode: 400,
-      body: 'Status code not supported!'
-    };
-    callback(null, response);
-    return;
-  }
-
-  const message = status[code];
+  const message = status[codeToUse];
   const response = {
-    statusCode: code,
+    statusCode: codeToUse,
     body: message
   };
   callback(null, response);

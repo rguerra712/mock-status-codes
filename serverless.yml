@@ -13,7 +13,7 @@ functions:
     events:
       - http:
           path: status/{code}
-          method: get
+          method: any
         request: 
           parameters: 
             paths: 

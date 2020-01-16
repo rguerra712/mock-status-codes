@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/rguerra712/mock-status-codes#readme",
   "devDependencies": {
+    "jest": "^23.6.0",
     "serverless-offline": "^3.27.0"
   },
   "dependencies": {
